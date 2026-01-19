@@ -1,20 +1,25 @@
-import { CssBaseline, ThemeProvider } from "@mui/material"
-import {ReactNode, useCallback, useMemo, useState} from "react";
+"use client";
+
+import * as React from "react";
+import { CssBaseline, ThemeProvider } from "@mui/material";
+import { AppRouterCacheProvider } from "@mui/material-nextjs/v14-appRouter";
 import { buildTheme } from "@/theme/theme";
 
-export default function Providers ({ children }: { children: ReactNode }) {
-    const [mode, setMode] = useState<"light" | "dark">("light");
+export default function Providers({ children }: { children: React.ReactNode }) {
+    const [mode, setMode] = React.useState<"light" | "dark">("light");
+    const theme = React.useMemo(() => buildTheme(mode), [mode]);
 
-    const theme = useMemo(() => buildTheme(mode), [mode]);
+    React.useEffect(() => {
+        (globalThis as any).__toggleTheme = () =>
+            setMode((m: "light" | "dark") => (m === "light" ? "dark" : "light"));
+    }, []);
 
-    (globalThis as any).__toggleTheme = useCallback(() => {
-        setMode((m) => (m === "light" ? "dark" : "light"));
-
-        return (
+    return (
+        <AppRouterCacheProvider options={{ enableCssLayer: true }}>
             <ThemeProvider theme={theme}>
-                <CssBaseline/>
+                <CssBaseline />
                 {children}
             </ThemeProvider>
-        );
-    })
+        </AppRouterCacheProvider>
+    );
 }

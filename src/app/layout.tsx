@@ -1,17 +1,17 @@
-import type { Metadata } from "next";
 import Providers from "./providers";
-import "./globals.css";
+import Shell from "./shell/shell";
 
-export const metadata: Metadata = {
-    title: "TechDex | Pokédex Dashboard",
-    description: "Tech-focused Pokédex using PokeAPI",
-};
-
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+                                       children,
+                                   }: {
+    children: React.ReactNode;
+}) {
     return (
         <html lang="pt-BR">
         <body>
-        <Providers>{children}</Providers>
+        <Providers>
+            <Shell>{children}</Shell>
+        </Providers>
         </body>
         </html>
     );
