@@ -1,54 +1,90 @@
 from fastapi import FastAPI, Depends, Query
 from sqlalchemy.orm import Session
-from sqlalchemy import select
-from .db import Base, engine, get_db
-from .models import Pokemon
-from .schemas import PokemonOut
-from .services import fetch_pokemon
-from .auth import require_api_key
+from typing import List, Optional
 
-app = FastAPI(title="PokeAPI Cache", version="1.0.0")
+from .db import get_db, Base, engine
+from .models import Pokemon
+from .security import require_api_key
+from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi import HTTPException
+
+app = FastAPI(title="PokeAPI Backend")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 Base.metadata.create_all(bind=engine)
 
-@app.post("/sync/{name_or_id}", response_model=PokemonOut, dependencies=[Depends(require_api_key)])
-def sync_pokemon(name_or_id: str, db: Session = Depends(get_db)):
-    data = fetch_pokemon(name_or_id)
+class PokemonIn(BaseModel):
+    pokemon_id: int
+    name: str
+    types: List[str]
+    abilities: List[str]
 
-    obj = db.get(Pokemon, data["id"])
-    if obj:
-        obj.name = data["name"]
-        obj.types = data["types"]
-        obj.abilities = data["abilities"]
-        obj.image = data["image"]
-    else:
-        obj = Pokemon(**data)
-        db.add(obj)
+@app.post("/pokemons")
+def upsert_pokemons(
+    payload: List[PokemonIn],
+    db: Session = Depends(get_db),
+    _=Depends(require_api_key),
+):
+    saved = 0
+    for p in payload:
+        existing = db.query(Pokemon).filter(Pokemon.pokemon_id == p.pokemon_id).first()
+        if existing:
+            existing.name = p.name
+            existing.types = p.types
+            existing.abilities = p.abilities
+        else:
+            db.add(Pokemon(
+                pokemon_id=p.pokemon_id,
+                name=p.name,
+                types=p.types,
+                abilities=p.abilities,
+            ))
+        saved += 1
 
     db.commit()
-    db.refresh(obj)
-    return obj
+    return {"saved": saved}
 
-@app.get("/pokemon", response_model=list[PokemonOut], dependencies=[Depends(require_api_key)])
-def list_pokemon(
+
+@app.get("/pokemons")
+def list_pokemons(
+    limit: int = Query(20, ge=1, le=200),
+    offset: int = Query(0, ge=0),
+    type: Optional[str] = None,
+    search: Optional[str] = None,
     db: Session = Depends(get_db),
-    type: str | None = Query(default=None),
-    search: str | None = Query(default=None),
-    limit: int = Query(default=20, ge=1, le=100),
-    offset: int = Query(default=0, ge=0),
+    _=Depends(require_api_key),
 ):
-    stmt = select(Pokemon)
-
-    if search:
-        stmt = stmt.where(Pokemon.name.ilike(f"%{search.lower()}%"))
+    q = db.query(Pokemon)
 
     if type:
-        stmt = stmt.where(Pokemon.types.contains([type.lower()]))
+        q = q.filter(Pokemon.types.any(type))  # ARRAY contains
+    if search:
+        q = q.filter(Pokemon.name.ilike(f"%{search}%"))
 
-    stmt = stmt.order_by(Pokemon.id.asc()).limit(limit).offset(offset)
-    return list(db.scalars(stmt).all())
+    return (
+        q.order_by(Pokemon.pokemon_id)
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
 
-@app.get("/pokemon/{id}", response_model=PokemonOut, dependencies=[Depends(require_api_key)])
-def get_pokemon(id: int, db: Session = Depends(get_db)):
-    obj = db.get(Pokemon, id)
-    return obj
+@app.delete("/pokemons")
+def delete_all_pokemons(
+    db: Session = Depends(get_db),
+    _=Depends(require_api_key),
+):
+    try:
+        deleted = db.query(Pokemon).delete(synchronize_session=False)
+        db.commit()
+        return {"deleted": deleted}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))

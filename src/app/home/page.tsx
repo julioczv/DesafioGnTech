@@ -1,21 +1,32 @@
 "use client";
 
 import React from "react";
-import { Root, GridLayout } from "./style";
-import { Box, CircularProgress, Typography } from "@mui/material";
+import {Root, GridLayout} from "./style";
+import {Box, Button, CircularProgress, Typography} from "@mui/material";
 import PokemonCard from "@/app/components/cards-pokemon/PokemonCard";
-import { usePokemonFilters } from "@/app/context/pokemon-filters-checkbox";
-import { useInfinitePokemon } from "@/app/hooks/useInfinitePokemon";
-import { usePokemonSearch } from "@/app/context/pokemon-search";
-import { usePokemonSearchResult } from "@/app/hooks/usePokemonSearchResult";
+import {usePokemonFilters} from "@/app/context/pokemon-filters-checkbox";
+import {useInfinitePokemon} from "@/app/hooks/useInfinitePokemon";
+import {usePokemonSearch} from "@/app/context/pokemon-search";
+import {usePokemonSearchResult} from "@/app/hooks/usePokemonSearchResult";
+import {savePokemonsToDb} from "../lib/send-backend";
+
+function mapToSavePayload(p: any) {
+    return {
+        pokemon_id: p.id,
+        name: p.name,
+        image: p.image ?? null,
+        types: p.types ?? [],
+        abilities: p.abilities ?? [],
+    };
+}
 
 export default function Home() {
-    const { activeTypes } = usePokemonFilters();
-    const { query } = usePokemonSearch();
+    const {activeTypes} = usePokemonFilters();
+    const {query} = usePokemonSearch();
 
     const isSearching = query.trim().length > 0;
 
-    const { items, loading, error, hasMore, loadMore } = useInfinitePokemon(
+    const {items, loading, error, hasMore, loadMore} = useInfinitePokemon(
         20,
         activeTypes,
         "OR"
@@ -34,7 +45,7 @@ export default function Home() {
             (entries) => {
                 if (entries[0]?.isIntersecting) loadMore();
             },
-            { rootMargin: "800px 0px", threshold: 0 }
+            {rootMargin: "800px 0px", threshold: 0}
         );
 
         obs.observe(el);
@@ -55,11 +66,22 @@ export default function Home() {
         <Root>
             {isSearching && search.loading && <Typography>Buscando...</Typography>}
             {isSearching && search.error && (
-                <Typography sx={{ color: "error.main", fontWeight: 800 }}>
+                <Typography sx={{color: "error.main", fontWeight: 800}}>
                     {search.error}
                 </Typography>
             )}
-
+            <Box sx={{ position: 'fixed' }}>
+                <Button
+                    variant="contained"
+                    onClick={async () => {
+                        const payload = items.map(mapToSavePayload);
+                        const r = await savePokemonsToDb(payload);
+                        alert(`Salvos no banco: ${r.saved}`);
+                    }}
+                >
+                    Salvar no banco
+                </Button>
+            </Box>
             <GridLayout
                 sx={{
                     display: "grid",
@@ -74,33 +96,33 @@ export default function Home() {
             >
                 {isSearching ? (
                     searchedPokemon ? (
-                        <PokemonCard pokemon={searchedPokemon} />
+                        <PokemonCard pokemon={searchedPokemon}/>
                     ) : (
                         !search.loading && (
-                            <Typography sx={{ opacity: 0.8, fontWeight: 700 }}>
+                            <Typography sx={{opacity: 0.8, fontWeight: 700}}>
                                 Nenhum Pokémon encontrado (ou não bate com o filtro)
                             </Typography>
                         )
                     )
                 ) : (
-                    items.map((p) => <PokemonCard key={p.id} pokemon={p} />)
+                    items.map((p) => <PokemonCard key={p.id} pokemon={p}/>)
                 )}
             </GridLayout>
 
             {!isSearching && (
-                <Box sx={{ py: 6, display: "grid", placeItems: "center" }}>
+                <Box sx={{py: 6, display: "grid", placeItems: "center"}}>
                     {error && (
-                        <Typography sx={{ color: "error.main", fontWeight: 800 }}>
+                        <Typography sx={{color: "error.main", fontWeight: 800}}>
                             {error}
                         </Typography>
                     )}
-                    {loading && <CircularProgress />}
+                    {loading && <CircularProgress/>}
                     {!hasMore && !loading && (
-                        <Typography sx={{ opacity: 0.7, fontWeight: 800 }}>
+                        <Typography sx={{opacity: 0.7, fontWeight: 800}}>
                             Fim da lista :D
                         </Typography>
                     )}
-                    <div ref={sentinelRef} style={{ height: 1, width: "100%" }} />
+                    <div ref={sentinelRef} style={{height: 1, width: "100%"}}/>
                 </Box>
             )}
         </Root>
