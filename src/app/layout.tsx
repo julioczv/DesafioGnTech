@@ -1,5 +1,5 @@
 import Providers from "./providers";
-import Shell from "./shell/shell";
+import Shell from "@/app/components/shell/shell";
 
 export default function RootLayout({
                                        children,
