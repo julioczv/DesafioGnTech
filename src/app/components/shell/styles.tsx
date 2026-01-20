@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Button, IconButton } from "@mui/material";
+import { Box } from "@mui/material";
 import { styled } from "@mui/material/styles";
 
 export const SIDEBAR_W = 300;
@@ -70,15 +70,6 @@ export const SearchBox = styled("div")(({ theme }) => ({
     },
 }));
 
-export const Brand = styled("h1")(({ theme }) => ({
-    margin: 0,
-    fontSize: 20,
-    fontWeight: 900,
-    fontStyle: "italic",
-    textTransform: "uppercase",
-    letterSpacing: "-0.05em",
-    span: { color: theme.palette.primary.main },
-}));
 
 export const Sidebar = styled(Box, {
     shouldForwardProp: (prop) => prop !== "$open" && prop !== "$mobileOpen",
@@ -118,21 +109,6 @@ export const Rail = styled(Box)(() => ({
     paddingTop: 10,
 }));
 
-export const TypeIconBtn = styled(IconButton)(({ theme }) => ({
-    width: 44,
-    height: 44,
-    borderRadius: 14,
-    border: `1px solid ${theme.palette.divider}`,
-    background: theme.palette.mode === "dark" ? "rgba(255,255,255,0.04)" : "#fff",
-    boxShadow: theme.palette.mode === "dark"
-        ? "0 8px 20px rgba(0,0,0,0.25)"
-        : "0 8px 20px rgba(0,0,0,0.06)",
-    "&:hover": {
-        borderColor: theme.palette.primary.main,
-        transform: "translateY(-1px)",
-    },
-    transition: "transform .15s ease, border-color .15s ease",
-}));
 
 export const TypeRow = styled(Box)(({ theme }) => ({
     display: "flex",

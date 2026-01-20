@@ -19,3 +19,16 @@ export type PokeDetailsResponse = {
         other?: { "art-oficial"?: {front_default: string | null } };
     }
 }
+
+export interface PokeTypeResponse {
+    pokemon: {
+        pokemon: {
+            name: string;
+            url: string;
+        };
+    }[];
+}
+
+export type PokeTypeListResponse = {
+    results: PokeTypeItem[];
+};

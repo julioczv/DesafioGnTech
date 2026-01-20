@@ -46,34 +46,6 @@ export const ChipRow = styled(Box)(({ theme }) => ({
     gap: 8,
 }))
 
-export const TypeChip = styled(Chip)<{ tone?: "fire" | "water" | "grass" | "electric" | "psychic" }>(
-    ({ theme, tone }) => {
-        const map = {
-            fire: "#FF421C",
-            water: "#2980EF",
-            grass: "#3FA129",
-            electric: "#FAC000",
-            psychic: "#EF4179",
-        } as const;
-
-        const bg = tone ? map[tone] : "#9aa0a6";
-
-        return {
-            height: 28,
-            borderRadius: 10,
-            fontWeight: 900,
-            letterSpacing: "0.08em",
-            textTransform: "uppercase",
-            fontSize: 12,
-            color: "#fff",
-            background: bg,
-            "& .MuiChip-label": { paddingInline: 12 },
-            ...(theme.palette.mode === "dark" && {
-                filter: "saturate(1.05)",
-            }),
-        };
-    }
-);
 
 export const ArtWrap = styled(Box)(({ theme }) => ({
     marginTop: 22,

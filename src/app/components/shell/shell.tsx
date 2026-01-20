@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from 'react'
 import {
     Box,
     IconButton,
@@ -7,7 +8,7 @@ import {
     Button,
     Stack,
     Checkbox,
-    TextField,
+    FormControlLabel,
     InputBase,
     Tooltip,
 } from "@mui/material";
@@ -25,18 +26,16 @@ import {
 } from "./styles";
 import {useMediaQuery} from "@mui/system";
 import {useEffect, useState} from "react";
-import LocalFireDepartmentIcon from "@mui/icons-material/LocalFireDepartment";
-import WaterDropIcon from "@mui/icons-material/WaterDrop";
-import GrassIcon from "@mui/icons-material/Grass";
-import ElectricBoltIcon from "@mui/icons-material/ElectricBolt";
-import PsychologyIcon from "@mui/icons-material/Psychology";
 import SearchIcon from "@mui/icons-material/Search";
 import {useThemeToggle} from "@/app/theme-toggle-context";
+import TypesFilter from "@/app/components/filter/type-filter";
+import {usePokemonSearch} from "@/app/context/pokemon-search";
+import TypeRail from "@/app/components/type-rail/type-rail";
+
 
 
 export default function Shell({children}: { children: React.ReactNode }) {
     const isMobile = useMediaQuery("(max-width: 799px)", {noSsr: true});
-
     const [open, setOpen] = useState(false);
     const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -50,6 +49,7 @@ export default function Shell({children}: { children: React.ReactNode }) {
     }
 
     const {toggleTheme} = useThemeToggle();
+    const {query, setQuery } = usePokemonSearch()
 
     return (
         <Root>
@@ -67,7 +67,10 @@ export default function Shell({children}: { children: React.ReactNode }) {
                     <SearchBox>
                         <SearchIcon fontSize="small"/>
                         <InputBase
-                            placeholder="Procure aqui seu Pokemon"
+                            value={query}
+                            onChange={(e) => setQuery(e.target.value)}
+                            placeholder="Pesquisar por nome ou ID..."
+                            size="small"
                             sx={{ml: 1, flex: 1, fontSize: 13}}
                         />
                     </SearchBox>
@@ -78,78 +81,11 @@ export default function Shell({children}: { children: React.ReactNode }) {
             </Header>
 
             <Sidebar $open={open} $mobileOpen={mobileOpen}>
-                {!open && (
-                    <Rail>
-                        <Tooltip title="Fire" placement="right">
-                            <LocalFireDepartmentIcon sx={{color: 'red'}}/>
-                        </Tooltip>
-
-                        <Tooltip title="Water" placement="right">
-                            <WaterDropIcon sx={{color: '#037bfc'}}/>
-                        </Tooltip>
-
-                        <Tooltip title="Grass" placement="right">
-                            <GrassIcon sx={{color: 'green'}}/>
-                        </Tooltip>
-
-                        <Tooltip title="Electric" placement="right">
-                            <ElectricBoltIcon sx={{color: '#fcbe03'}}/>
-                        </Tooltip>
-
-                        <Tooltip title="Psychic" placement="right">
-                            <PsychologyIcon sx={{color: 'purple'}}/>
-                        </Tooltip>
-                    </Rail>
-                )}
+                {!open && <TypeRail />}
                 {open && (
                     <Box sx={{mt: 4}}>
-                        <Box
-                            sx={{
-                                display: "flex",
-                                justifyContent: "space-between",
-                                alignItems: "center",
-                                mb: 2,
-                            }}
-                        >
-                            <Typography
-                                sx={{
-                                    fontSize: 10,
-                                    fontWeight: 900,
-                                    letterSpacing: "0.2em",
-                                    textTransform: "uppercase",
-                                    color: "text.secondary",
-                                }}
-                            >
-                                Tipos Primários
-                            </Typography>
-                        </Box>
-
                         <Stack spacing={0.5}>
-                            <TypeRow>
-                                <Checkbox defaultChecked size="small"/>
-                                <TypeDot variant="fire"/>
-                                <Typography sx={{fontWeight: 700}}>Fogo</Typography>
-                            </TypeRow>
-                            <TypeRow>
-                                <Checkbox size="small"/>
-                                <TypeDot variant="water"/>
-                                <Typography sx={{fontWeight: 700}}>Água</Typography>
-                            </TypeRow>
-                            <TypeRow>
-                                <Checkbox size="small"/>
-                                <TypeDot variant="grass"/>
-                                <Typography sx={{fontWeight: 700}}>Planta</Typography>
-                            </TypeRow>
-                            <TypeRow>
-                                <Checkbox size="small"/>
-                                <TypeDot variant="electric"/>
-                                <Typography sx={{fontWeight: 700}}>Elétrico</Typography>
-                            </TypeRow>
-                            <TypeRow>
-                                <Checkbox size="small"/>
-                                <TypeDot variant="psychic"/>
-                                <Typography sx={{fontWeight: 700}}>Psychic</Typography>
-                            </TypeRow>
+                          <TypesFilter />
                         </Stack>
                     </Box>
                 )}
