@@ -1,36 +1,103 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+POKEAPI - Desafio Técnico Fullstack - GnTech
 
-## Getting Started
+Este projeto foi desenvolvido como parte de um desafio técnico, com o objetivo de demonstrar, de forma prática,
+a capacidade de integrar diferentes camadas de uma aplicação moderna: frontend, backend, banco de dados e infraestrutura.
 
-First, run the development server:
+A solução apresentada utiliza a PokeAPI como fonte de dados pública e implementa um fluxo completo de extração, persistência
+e consulta dessas informações, seguindo boas práticas de organização, versionamento e arquitetura.
 
-```bash
+
+O que foi utilizado ? 
+
+Linguagens: postgres (SQL), "HTML e CSS" e python.
+Frameworks: Next.js
+
+
+Objetivos do Projeto
+
+1. Consumir dados de uma API pública
+
+2. Processar e estruturar esses dados
+
+3. Persistir informações em um banco de dados relacional
+
+4. Expor uma API REST para consulta
+
+5. Demonstrar integração entre frontend e backend
+
+6. Utilizar Docker para padronização do ambiente
+
+7. Manter clareza, organização e documentação do código
+
+
+Fluxo de Dados
+
+1. O frontend (Next.js) consome dados diretamente da PokeAPI
+
+2. Os Pokémons são exibidos ao usuário
+
+3. Ao acionar a opção “Salvar no banco”:
+
+4. O frontend envia os dados já consumidos para o backend
+
+   5. O backend (FastAPI):
+
+    6. Recebe os dados
+
+    7. Realiza validações
+
+    8. Insere ou atualiza os registros no banco de dados
+
+    9. Os dados ficam disponíveis para consulta via API REST
+
+
+API Pública Utilizada
+
+PokeAPI: https://pokeapi.co/api/v2/pokemon
+
+Banco de Dados: PostgreSQL 16<br/>
+Tabela: Pokemons
+
+id	Chave primária<br/>
+pokemon_id	ID original da PokeAPI<br/>
+name	Nome do Pokémon<br/>
+types	Tipos do Pokémon<br/>
+abilities	Habilidades<br/>
+created_at	Data de criação
+
+Backend – FastAPI
+
+O backend foi desenvolvido utilizando FastAPI, visando simplicidade, performance e excelente documentação automática.
+
+Endpoints disponíveis <br/>
+
+POST	/pokemons	Salva os Pokémons <br/>
+GET	/pokemons	Lista Pokémons  <br/>
+DELETE	/pokemons	Remove todos os Pokémons
+
+Segurança: Como não há uma chave API da PokeAPI eu criei uma para poder suprir a necessidade do desafio
+poke-api-key: challenge-demo-key
+
+Disponivel via Swagger:
+http://localhost:8000/docs
+
+Conteinerização com Docker
+Todo o ambiente é executado via Docker Compose, garantindo facilidade de execução e padronização.
+
+Backend (FastAPI)	8000<br/>
+PostgreSQL	5432
+
+Para executar o projeto:
+docker compose up --build<br/>
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Váriaveis de ambiente
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Backend<br/>
+DATABASE_URL=postgresql+psycopg2://postgres:password@db:5432/Pokemons<br/>
+POKEAPI_API_KEY=challenge-demo-key
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Frontend<br/>
+NEXT_PUBLIC_BACKEND_URL=http://localhost:8000<br/>
+POKEAPI_API_KEY=challenge-demo-key
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
